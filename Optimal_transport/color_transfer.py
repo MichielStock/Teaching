@@ -13,8 +13,12 @@ Takes to color scheme of one image and transforms it to another image
 import numpy as np
 from optimal_transport import OptimalTransport
 from skimage import io
+from skimage.color import rgb2hsv, hsv2rgb
 from sklearn.neighbors import KNeighborsRegressor
 import argparse
+
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 
 name_from = 'starry.jpg'
 name_to = 'coupure.jpg'
@@ -38,10 +42,13 @@ arg_parser.add_argument('-lam', type=float, default=10,
                 help='value for entropic regularization (default: 10)')
 arg_parser.add_argument('-n_neighbors', type=int, default=10,
                 help='number of neighbors in the KNN (default: 10)')
-arg_parser.add_argument('-metric', type=str, default='euclidean',
-                help='distance metric used for cost matrix')
+arg_parser.add_argument('-metric', type=str, default='mahalanobis',
+                help='distance metric used for cost matrix (default: Mahalanobis)')
 arg_parser.add_argument('-save_color_distribution', type=bool, default=False,
                 help='save plots of the to and from color distribition')
+arg_parser.add_argument('--hsv', dest='use_hsv', default=False, const=True,
+                action='store_const',
+                help='process the image in hsv space (default: in RGB space)')
 args = arg_parser.parse_args()
 
 # get arguments
@@ -58,27 +65,30 @@ def im2mat(I):
     """Converts and image to matrix (one pixel per line)"""
     return I.reshape((I.shape[0] * I.shape[1], I.shape[2]))
 
-
 def mat2im(X, shape):
     """Converts back a matrix to an image"""
     return X.reshape(shape)
-
 
 def minmax(I):
     return np.clip(I, 0, 1)
 
 def main():
     # read the images
-    image_from = io.imread(name_from)
-    image_to = io.imread(name_to)
+    image_from = io.imread(name_from) / 256
+    image_to = io.imread(name_to) / 256
+
+    # change to hsv domain (if requested)
+    if args.use_hsv:
+        image_from[:] = rgb2hsv(image_from)
+        image_to[:] = rgb2hsv(image_to)
 
     # get shapes
     shape_from = image_from.shape
     shape_to = image_to.shape
 
     # flatten
-    X_from = im2mat(image_from) / 256
-    X_to = im2mat(image_to) / 256
+    X_from = im2mat(image_from)
+    X_to = im2mat(image_to)
 
     # number of pixes
     n_pixels_from = X_from.shape[0]
@@ -96,8 +106,12 @@ def main():
         fig, axes = plt.subplots(nrows=2, figsize=(5, 10))
         for ax, X in zip(axes, [X_from_ss, X_to_ss]):
             ax.scatter(X[:,0], X[:,1], color=X)
-            ax.set_xlabel('red')
-            ax.set_ylabel('green')
+            if args.use_hsv:
+                ax.set_xhsvel('hue')
+                ax.set_yhsvel('value')
+            else:
+                ax.set_xhsvel('red')
+                ax.set_yhsvel('green')
         axes[0].set_title('distr. from')
         axes[1].set_title('distr. to')
         fig.tight_layout()
@@ -113,6 +127,8 @@ def main():
     X_transfered = transfer_model.predict(X_to)
 
     image_transferd = minmax(mat2im(X_transfered, shape_to))
+    if args.use_hsv:
+        image_transferd[:] = hsv2rgb(image_transferd)
     io.imsave(name_out, image_transferd)
 
 if __name__ == '__main__':
