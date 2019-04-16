@@ -10,7 +10,7 @@ Implementation of the Sinkhorn-Knopp algorithm for optimal transport
 
 import numpy as np
 
-def compute_optimal_transport(M, r, c, lam, epsilon=1e-8):
+def compute_optimal_transport(M, r, c, lam, epsilon=1e-5):
     """
     Computes the optimal transport matrix and Slinkhorn distance using the
     Sinkhorn-Knopp algorithm
