@@ -20,21 +20,22 @@ import argparse
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
-name_from = 'starry.jpg'
-name_to = 'coupure.jpg'
-name_out = 'test.jpg'
+
 
 n_pixels = 1000
 lam = 10
 n_neighbors = 10
+name_from = 'Figures/PB2PC.jpg'
+name_to = 'Figures/PC.jpg'
+name_out = 'test.jpg'
 
 arg_parser = argparse.ArgumentParser()
 
-arg_parser.add_argument('-f', '--fr', type=str,
+arg_parser.add_argument('-f', '--fr', type=str,default='Figures/PC.jpg',
                 help='image to take the color from')
-arg_parser.add_argument('-t', '--to', type=str,
+arg_parser.add_argument('-t', '--to', type=str,default='Figures/PB.jpg',
                 help='image transform')
-arg_parser.add_argument('-o', '--out', type=str,
+arg_parser.add_argument('-o', '--out', type=str,default='test.jpg',
                 help='name of the output image')
 arg_parser.add_argument('-n_pixels', type=int, default=1000,
                 help='number of pixels to sample (default: 1000)')
@@ -42,7 +43,7 @@ arg_parser.add_argument('-lam', type=float, default=10,
                 help='value for entropic regularization (default: 10)')
 arg_parser.add_argument('-n_neighbors', type=int, default=10,
                 help='number of neighbors in the KNN (default: 10)')
-arg_parser.add_argument('-metric', type=str, default='mahalanobis',
+arg_parser.add_argument('-metric', type=str, default='mahalanobis',#mahalanobis
                 help='distance metric used for cost matrix (default: Mahalanobis)')
 arg_parser.add_argument('-save_color_distribution', type=bool, default=False,
                 help='save plots of the to and from color distribition')
@@ -107,11 +108,11 @@ def main():
         for ax, X in zip(axes, [X_from_ss, X_to_ss]):
             ax.scatter(X[:,0], X[:,1], color=X)
             if args.use_hsv:
-                ax.set_xhsvel('hue')
-                ax.set_yhsvel('value')
+                ax.set_xlabel('hue')
+                ax.set_ylabel('value')
             else:
-                ax.set_xhsvel('red')
-                ax.set_yhsvel('green')
+                ax.set_xlabel('red')
+                ax.set_ylabel('green')
         axes[0].set_title('distr. from')
         axes[1].set_title('distr. to')
         fig.tight_layout()
@@ -119,7 +120,7 @@ def main():
 
     # optimal tranportation
     ot_color = OptimalTransport(X_to_ss, X_from_ss, lam=lam,
-                                    distance_metric=distance_metric)
+                                    distance_metric=distance_metric)#euclidean distance_metric
 
     # model transfer
     transfer_model = KNeighborsRegressor(n_neighbors=n_neighbors)
