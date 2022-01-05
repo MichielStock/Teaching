@@ -42,18 +42,20 @@ if __name__ == '__main__':
 
     from sys import path
     path.append('../../Scripts')
-    from plotting import plt, blue, orange, green, red, yellow
+    # from plotting import plt, blue, orange, green, red, yellow
+    from matplotlib import pyplot as plt
 
+    #blue, orange, green, red, yellow
 
     from sklearn.datasets import make_moons
     from scipy.spatial import distance_matrix
 
-    X, y = make_moons(n_samples=100, noise=0.1, shuffle=False)
+    X, y = make_moons(n_samples=200, noise=0.1, shuffle=False)
 
     X1 = X[y==1,:]
     X2 = -X[y==0,:]
 
-    X2 = X2[:40]  # different size X1 and X2
+    #X2 = X2[:40]  # different size X1 and X2
 
     n, m = X1.shape[0], X2.shape[0]
 
@@ -65,12 +67,12 @@ if __name__ == '__main__':
     P, d = compute_optimal_transport(M, r, c, lam=30, epsilon=1e-5)
 
     fig, (ax1, ax2, ax) = plt.subplots(ncols=3)
-    ax.scatter(X1[:,0], X1[:,1], color=blue)
-    ax.scatter(X2[:,0], X2[:,1], color=orange)
+    ax.scatter(X1[:,0], X1[:,1], color='b')
+    ax.scatter(X2[:,0], X2[:,1], color='c')
 
     for i in range(n):
         for j in range(m):
-            ax.plot([X1[i,0], X2[j,0]], [X1[i,1], X2[j,1]], color=red,
+            ax.plot([X1[i,0], X2[j,0]], [X1[i,1], X2[j,1]], color='r',
                     alpha=P[i,j] * n)
 
     ax.set_title('Optimal matching')
@@ -80,4 +82,5 @@ if __name__ == '__main__':
 
     ax2.imshow(P)
     ax2.set_title('Transport matrix')
+    print(d)
     plt.show()
