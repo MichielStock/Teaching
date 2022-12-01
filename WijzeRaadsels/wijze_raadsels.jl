@@ -171,7 +171,7 @@ end;
 
 # ╔═╡ ccb91576-dffc-4e52-9ae0-2e83d788bfad
 md"""
-Bepaal hier de volgorde van je steden:
+Bepaal hier de volgorde van je steden: 
 
 1. $(@bind h1 Select(hoofdsteden))
 1. $(@bind h2 Select(hoofdsteden))
